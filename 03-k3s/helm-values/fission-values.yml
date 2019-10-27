@@ -1,0 +1,8 @@
+serviceType: NodePort
+
+routerServiceType: NodePort
+
+prometheusDeploy: false
+
+persistence:
+  storageClass: local-path
