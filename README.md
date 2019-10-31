@@ -3,6 +3,47 @@ QUARKUS-FISSION-K3S
 
 Demontration using QuarkusIO on Fission K3S
 
+
+# QUARKUS
+
+**Initiate the project**
+```
+mvn io.quarkus:quarkus-maven-plugin:0.27.0:create \
+    -DprojectGroupId=fr.ippon \
+    -DprojectArtifactId=vote \
+    -DclassName="fr.ippon.vote.GreetingResource" \
+    -Dpath="/hello"
+```
+
+**Build**
+```
+./mvnw package
+```
+
+**Test**
+```
+java -jar target/vote-1.0-SNAPSHOT-runner.jar
+curl -w "\n" http://localhost:8080/hello
+```
+
+
+```
+zip -r quarkus-function-pkg.zip target/lib target/vote-1.0-SNAPSHOT-runner.jar
+fission env create --name jvm --image fission/jvm-env --version 2 --keeparchive=true
+fission package create --sourcearchive quarkus-function-pkg.zip --env java
+
+fission fn create --name hello --pkg quarkus-function-pkg-zip-tvd0 --env java --entrypoint fr.ippon.vote.GreetingResource
+
+fission fn test --name hello
+
+```
+
+
+
+
+
+# K3S
+
 **Deploy a local K3S on Docker:**
 ```
 k3d create --publish 8081:30001@k3d-k3s-default-worker-0 --publish 8080:80@k3d-k3s-default-worker-0  --workers 2
