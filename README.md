@@ -68,17 +68,19 @@ helm install 03-k3s/helm-charts/local-path-provisioner/ --name local-path-storag
 
 > See: https://github.com/rancher/local-path-provisioner
 
+# FISSION
+
 **Install Fission:**
 
 ```
 helm repo add fission-charts https://fission.github.io/fission-charts/
 helm repo update
-helm install --name fission --namespace fission -f 03-k3s/helm-values/fission-values.yml fission-charts/fission-all --version 1.6.0
+helm install --name fission --namespace fission -f 03-fission/helm-values/fission-values.yml fission-charts/fission-all --version 1.6.0
 ```
 > The charts are not available yet in 1.6.0, so use the variant:
 
 ```
-helm install --name fission --namespace fission -f 03-k3s/helm-values/fission-values.yml 03-k3s/helm-charts/fission-all/
+helm install --name fission --namespace fission -f 03-fission/helm-values/fission-values.yml 03-fission/helm-charts/fission-all/
 ```
 
 OR
