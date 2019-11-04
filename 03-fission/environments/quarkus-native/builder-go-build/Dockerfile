@@ -1,25 +1,8 @@
 ## Fission builder base image
-# ARG BUILDER_IMAGE=fission/builder:latest
-# FROM ${BUILDER_IMAGE} AS builder
+ARG BUILDER_IMAGE=fission/builder:latest
+FROM ${BUILDER_IMAGE}
 
-ARG GO_VERSION=1.9.2
-FROM golang:${GO_VERSION} AS builder
-
-ENV GOPATH /usr
-ENV GOBIN /
-ENV APP    ${GOPATH}/src
-
-WORKDIR ${APP}
-
-ADD app       ${APP}/app
-ADD main.go   ${APP}
-
-RUN go get
-RUN go build -a -o /builder main.go
-
-FROM ubuntu:18.04
-
-ARG GRAAL_VERSION=19.2.0.1
+ARG GRAAL_VERSION=19.2.1
 ARG MAVEN_VERSION=3.5.4
 ARG MAVEN_SHA=ce50b1c91364cb77efe3776f756a6d92b76d9038b0a0782f7d53acf1e997a14d
 ARG MAVEN_BASE_URL=https://apache.osuosl.org/maven/maven-3/${MAVEN_VERSION}/binaries
@@ -27,11 +10,10 @@ ARG USER_HOME_DIR="/root"
 
 WORKDIR /
 
-RUN rm -rf /var/lib/apt/lists/*
-RUN apt update && apt install -y ca-certificates curl
+RUN apk update && apk add --no-cache curl tar bash procps ca-certificates curl
 
 # INSTALL GCC
-RUN apt-get install -y build-essential libz-dev
+RUN apk add build-base
 
 # INSTALL GRAALVM
 ENV LANG=en_US.UTF-8
@@ -70,7 +52,5 @@ ENV MAVEN_HOME /usr/share/maven
 ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
 
 ## Fission builder specific section
-# COPY --from=builder /builder /
-COPY --from=builder /builder /
 ADD build.sh /usr/local/bin/build
 EXPOSE 8001

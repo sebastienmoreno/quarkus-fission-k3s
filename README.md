@@ -87,20 +87,18 @@ helm install 02-k3s/helm-charts/local-path-provisioner/ --name local-path-storag
 # FISSION
 
 **Install Fission:**
+```
+helm install --name fission --namespace fission -f 03-fission/helm-values/fission-values.yml 03-fission/helm-charts/fission-all/
+```
 
+> The charts are not available yet in 1.6.0 in official repos, when it does you could use:
 ```
 helm repo add fission-charts https://fission.github.io/fission-charts/
 helm repo update
 helm install --name fission --namespace fission -f 03-fission/helm-values/fission-values.yml fission-charts/fission-all --version 1.6.0
 ```
-> The charts are not available yet in 1.6.0, so use the variant:
 
-```
-helm install --name fission --namespace fission -f 03-fission/helm-values/fission-values.yml 03-fission/helm-charts/fission-all/
-```
-
-OR
-
+Other type of install with binaries:
 ```
 helm install --name fission --namespace fission --set serviceType=NodePort,routerServiceType=NodePort,prometheusDeploy=false,persistence.storageClass=local-path https://github.com/fission/fission/releases/download/1.6.0/fission-all-1.6.0.tgz
 ```
@@ -117,4 +115,26 @@ EOF
 fission function create --name hello --env nodejs --code hello.js
 fission route add --function hello --url /ihello --createingress
 curl http://localhost:8080/ihello
+```
+
+# Examples
+
+```
+fission env create --name quarkus-runtime --image smoreno/quarkus-runtime --version 2 --keeparchive=true
+fission fn create --name hello --deploy 01-quarkus/vote/target/vote-1.0-SNAPSHOT-runner --env quarkus-runtime --entrypoint io.fission.HelloWorld
+#fission route create --function hello --url /hellop --method GET
+fission route add --function hello --url /hello --createingress
+curl http://localhost:8080/hello
+```
+
+```
+zip -r java-src-pkg.zip *
+fission env create --name quarkus-runtime --image smoreno/quarkus-runtime --version 2 --keeparchive=true --builder smoreno/quarkus-builder
+# Check pods
+kubectl -n fission-function get pods
+fission package create --sourcearchive java-src-pkg.zip --env quarkus-runtime
+
+fission package info --name java-src-pkg-zip-tvd0
+
+fission fn create --name hello --pkg java-src-pkg-zip-tvd0 --env quarkus --entrypoint io.fission.HelloWorld
 ```

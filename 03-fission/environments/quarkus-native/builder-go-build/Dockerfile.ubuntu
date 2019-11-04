@@ -74,3 +74,25 @@ ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
 COPY --from=builder /builder /
 ADD build.sh /usr/local/bin/build
 EXPOSE 8001
+
+# RUN curl https://dl.google.com/go/go1.13.3.linux-amd64.tar.gz -o /tmp/go.tar.gz
+# RUN tar -xvf /tmp/go.tar.gz
+# RUN mv go /usr/local
+# RUN rm /tmp/go.tar.gz
+
+# ARG GITCOMMIT=unknown
+# # E.g. GITCOMMIT=$(git rev-parse HEAD)
+
+# ARG BUILDVERSION=unknown
+# # E.g. BUILDVERSION=$(git rev-parse HEAD)
+
+# ARG BUILDDATE=unknown
+# # E.g. BUILDDATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+# COPY ./ ./
+# RUN /usr/local/go/bin/go get
+# RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 /usr/local/go/bin/go build \
+#     -o /builder \
+#     -gcflags=-trimpath=$GOPATH \
+#     -asmflags=-trimpath=$GOPATH \
+#     -ldflags "-X github.com/fission/fission/pkg/info.GitCommit=${GITCOMMIT} -X github.com/fission/fission/pkg/info.BuildDate=${BUILDDATE} -X github.com/fission/fission/pkg/info.Version=${BUILDVERSION}"
+
