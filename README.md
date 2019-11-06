@@ -128,13 +128,16 @@ curl http://localhost:8080/hello
 ```
 
 ```
-zip -r java-src-pkg.zip *
-fission env create --name quarkus-runtime --image smoreno/quarkus-runtime --version 2 --keeparchive=true --builder smoreno/quarkus-builder
+fission env create --name quarkus-native --image smoreno/quarkus-native-env --version 2 --keeparchive=true --builder smoreno/quarkus-native-builder
 # Check pods
 kubectl -n fission-function get pods
-fission package create --sourcearchive java-src-pkg.zip --env quarkus-runtime
 
-fission package info --name java-src-pkg-zip-tvd0
+zip -r java-src-pkg.zip *
+fission package create --sourcearchive java-src-pkg.zip --env quarkus-native
 
-fission fn create --name hello --pkg java-src-pkg-zip-tvd0 --env quarkus --entrypoint io.fission.HelloWorld
+fission package info --name java-src-pkg-zip-wcok
+
+kubectl -n fission-builder get pods
+
+fission fn create --name hello --pkg java-src-pkg-zip-wcok --env quarkus-native --entrypoint io.fission.HelloWorld
 ```

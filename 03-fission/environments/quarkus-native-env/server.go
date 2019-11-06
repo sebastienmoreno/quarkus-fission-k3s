@@ -10,12 +10,14 @@ import (
   "net/http/httputil"
   "net/url"
   "os"
-  "syscall"
+  "os/exec"
 )
 
 const (
-	CODE_PATH          = "/userfunc/user"
+  CODE_PATH          = "/userfunc/user"
 )
+
+var specialized bool
 
 type (
   FunctionLoadRequest struct {
@@ -37,7 +39,6 @@ type (
 )
 
 // var userFunc http.HandlerFunc
-var specialized bool
 
 // func (bs *BinaryServer) specializeHandler(logger *zap.Logger) func(w http.ResponseWriter, r *http.Request)
 // 	if specialized {
@@ -232,17 +233,18 @@ func specializeHandler(logger *zap.Logger) func(http.ResponseWriter, *http.Reque
       }
     }
 
-    logger.Info("CODE_PATH", zap.String("CODE_PATH", CODE_PATH))
-    logger.Info("loadreq.FilePath", zap.String("loadreq.FilePath", loadreq.FilePath))
-    logger.Info("loadreq.FunctionName", zap.String("loadreq.FunctionName", loadreq.FunctionName))
-
-    args := []string{}
-    env := os.Environ()
-    logger.Info("Executing function process ...")
-    execErr := syscall.Exec(loadreq.FilePath, args, env)
-    if execErr != nil {
-        panic(execErr)
+    logger.Info("Changing execution rights on "+loadreq.FilePath+"...")
+    chmodErr := os.Chmod(loadreq.FilePath, 0755)
+    if chmodErr != nil {
+      panic(chmodErr)
     }
+    logger.Info("Executing in background "+loadreq.FilePath+"...")
+    cmd := exec.Command(loadreq.FilePath, "-Dquarkus.http.host=0.0.0.0")
+    execErr := cmd.Start()
+    if execErr != nil {
+      panic(execErr)
+    }
+  
     logger.Info("Specializing ...")
     specialized = true
     logger.Info("done")
@@ -273,12 +275,31 @@ func main() {
   // 	}
   // 	userFunc(w, r)
   // })
-  userfuncUrl, err := url.Parse("http://localhost:8080")
-  if err != nil {
-    panic(err)
+
+
+  // userfuncUrl, err := url.Parse("http://localhost:8080")
+  // if err != nil {
+  //   panic(err)
+  // }
+  // proxy := httputil.NewSingleHostReverseProxy(userfuncUrl)
+  // http.HandleFunc("/", handler(proxy))
+
+
+  origin, _ := url.Parse("http://localhost:8080/")
+
+  director := func(req *http.Request) {
+    req.Header.Add("X-Forwarded-Host", req.Host)
+    req.Header.Add("X-Origin-Host", origin.Host)
+    req.URL.Scheme = "http"
+    req.URL.Host = origin.Host
   }
-  proxy := httputil.NewSingleHostReverseProxy(userfuncUrl)
-  http.HandleFunc("/", handler(proxy))
+
+  proxy := &httputil.ReverseProxy{Director: director}
+
+  http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    log.Println("Calling ", r.URL)
+    proxy.ServeHTTP(w, r)
+  })
 
   logger.Info("listening on 8888 ...")
   err = http.ListenAndServe(":8888", nil)
@@ -287,17 +308,19 @@ func main() {
   }
 }
 
-func handler(p *httputil.ReverseProxy) func(w http.ResponseWriter, r *http.Request) {
-  if !specialized {
-    return func(w http.ResponseWriter, r *http.Request) {
-      w.WriteHeader(http.StatusInternalServerError)
-      w.Write([]byte("Generic container: no requests supported"))
-    }
-  } else {
-    return func(w http.ResponseWriter, r *http.Request) {
-            log.Println(r.URL)
-            w.Header().Set("X-Ben", "Rad")
-            p.ServeHTTP(w, r)
-    }
-  }
-}
+// func handler(p *httputil.ReverseProxy) func(w http.ResponseWriter, r *http.Request) {
+//   log.Println("Proxing HTTP call")
+//   // if !specialized {
+//   //   return func(w http.ResponseWriter, r *http.Request) {
+//   //     w.WriteHeader(http.StatusInternalServerError)
+//   //     w.Write([]byte("Generic container: no requests supported"))
+//   //   }
+//   // } else {
+//     return func(w http.ResponseWriter, r *http.Request) {
+//             log.Println(r.URL)
+//             // Update the headers to allow for SSL redirection
+//             w.Header().Set("X-Ben", "Rad")
+//             p.ServeHTTP(w, r)
+//     }
+//   // }
+// }
