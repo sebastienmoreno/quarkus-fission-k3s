@@ -72,9 +72,9 @@ Other type of install with binaries:
 helm install --name fission --namespace fission --set serviceType=NodePort,routerServiceType=NodePort,prometheusDeploy=false,persistence.storageClass=local-path https://github.com/fission/fission/releases/download/1.6.0/fission-all-1.6.0.tgz
 ```
 
-
-
 # Quarkus Fission use case
+
+helm install --name postgres --namespace fission-function --set postgresqlPassword=quarkus_test,postgresqlDatabase=quarkus_test,postgresqlUsername=quarkus_test,persistence.storageClass=local-path,fullnameOverride=postgres stable/postgresql
 
 **Create environment:**
 ```
@@ -103,4 +103,20 @@ fission fn test --name hello
 fission route add --function hello --url /hello --createingress
 
 curl http://localhost:8080/hello
+```
+
+**Rockstar**
+```
+fission fn create --name rockstar --pkg java-src-pkg-zip-ludc --env quarkus-native
+
+fission fn test --name rockstar
+
+fission route add --function rockstar --url /rockstars --createingress --method GET
+
+fission route add --function rockstar --url /rockstar --createingress --method POST
+
+curl -X GET "http://localhost:8080/rockstars"
+
+curl -X POST -H "Content-Type: application/json;charset=UTF-8" "http://localhost:8080/rockstar" -d '{"name":"Led Zeppelin"}'
+
 ```
