@@ -27,37 +27,6 @@ curl -w "\n" http://localhost:8080/hello
 ```
 
 
-```
-zip -r quarkus-function-pkg.zip lib vote-1.0-SNAPSHOT-runner.jar
-
-fission env create --name java --image fission/jvm-env --version 2 --keeparchive=true
-fission package create --sourcearchive quarkus-function-pkg.zip --env java
-
-fission fn create --name hello --pkg quarkus-function-pkg-zip-vmug --env java --entrypoint fr.ippon.vote.GreetingResource
-
-fission fn test --name hello2
-
-```
-
-CUSTOM
-```
-fission env create --name jvm --image smoreno/jvm-env --version 2 --keeparchive --builder smoreno/jvm-builder
-2736  fission env create --name jvm --image smoreno/jvm-env --version 2 --keeparchive --builder smoreno/jvm-builder
-fission env list
-cd 01-quarkus/vote
-zip -Tv java-src-pkg.zip
-fission package create --sourcearchive java-src-pkg.zip --env jvm
-fission package info --name java-src-pkg-zip-iwyg
-fission fn create --name hello2 --pkg java-src-pkg-zip-iwyg --env jvm --entrypoint fr.ippon.vote.GreetingResource
-
-fission fn test --name hello2
-
-```
-
-
-
-
-
 # K3S
 
 **Deploy a local K3S on Docker:**
@@ -104,40 +73,34 @@ helm install --name fission --namespace fission --set serviceType=NodePort,route
 ```
 
 
-# Example of function
-```
-cat > hello.js  <<\EOF
-module.exports = function(context, callback) {
-    callback(200, "Hello, world!\n");
-}
-EOF
 
-fission function create --name hello --env nodejs --code hello.js
-fission route add --function hello --url /ihello --createingress
-curl http://localhost:8080/ihello
-```
+# Quarkus Fission use case
 
-# Examples
-
-```
-fission env create --name quarkus-runtime --image smoreno/quarkus-runtime --version 2 --keeparchive=true
-fission fn create --name hello --deploy 01-quarkus/vote/target/vote-1.0-SNAPSHOT-runner --env quarkus-runtime --entrypoint hello
-#fission route create --function hello --url /hellop --method GET
-fission route add --function hello --url /hello --createingress
-curl http://localhost:8080/hello
-```
-
+**Create environment:**
 ```
 fission env create --name quarkus-native --image smoreno/quarkus-native-env --version 2 --keeparchive=true --builder smoreno/quarkus-native-builder
+
 # Check pods
 kubectl -n fission-function get pods
+```
 
+**Package and build:**
+```
 zip -r java-src-pkg.zip *
 fission package create --sourcearchive java-src-pkg.zip --env quarkus-native
 
 fission package info --name java-src-pkg-zip-wcok
 
 kubectl -n fission-builder get pods
+```
 
-fission fn create --name hello --pkg java-src-pkg-zip-wcok --env quarkus-native --entrypoint io.fission.HelloWorld
+**Create function:**
+```
+fission fn create --name hello --pkg java-src-pkg-zip-ludc --env quarkus-native
+
+fission fn test --name hello
+
+fission route add --function hello --url /hello --createingress
+
+curl http://localhost:8080/hello
 ```
