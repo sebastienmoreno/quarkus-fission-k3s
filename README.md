@@ -121,7 +121,7 @@ curl http://localhost:8080/ihello
 
 ```
 fission env create --name quarkus-runtime --image smoreno/quarkus-runtime --version 2 --keeparchive=true
-fission fn create --name hello --deploy 01-quarkus/vote/target/vote-1.0-SNAPSHOT-runner --env quarkus-runtime --entrypoint io.fission.HelloWorld
+fission fn create --name hello --deploy 01-quarkus/vote/target/vote-1.0-SNAPSHOT-runner --env quarkus-runtime --entrypoint hello
 #fission route create --function hello --url /hellop --method GET
 fission route add --function hello --url /hello --createingress
 curl http://localhost:8080/hello
