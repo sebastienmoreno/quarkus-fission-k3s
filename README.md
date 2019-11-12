@@ -22,8 +22,11 @@ mvn io.quarkus:quarkus-maven-plugin:0.27.0:create \
 
 **Test**
 ```
-java -jar target/vote-1.0-SNAPSHOT-runner.jar
-curl -w "\n" http://localhost:8080/hello
+java -jar target/rockstar-1.0-SNAPSHOT-runner.jar
+
+curl -w "\n" http://localhost:8080/
+curl -X POST -H "Content-Type: application/json;charset=UTF-8" "http://localhost:8080/" -d '{"name":"Jaco Pastorius"}'
+
 ```
 
 
