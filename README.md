@@ -32,16 +32,16 @@ curl -w "\n" http://localhost:8080/hello
 ## Deploy Remote K3S cluster
 
 ```
-export SERVER_IP=34.254.174.221
-export AGENT1_IP=18.202.20.167
-export AGENT2_IP=18.203.220.107
+export SERVER_IP=54.229.95.135
+export AGENT1_IP=34.241.125.164
+export AGENT2_IP=54.154.214.146
 
 k3sup install --ip $SERVER_IP --ssh-key ~/.ssh/ec2-training-keypair.pem --user ec2-user
 
 k3sup join --server-ip $SERVER_IP --ip $AGENT1_IP --ssh-key ~/.ssh/ec2-training-keypair.pem --user ec2-user
-k3sup join --server-ip $SERVER_IP --ip $AGENT2_IP --ssh-key ~/.ssh/ec2-training-keypair.pem --user ec2-user
+k3sup join --server-ip $SERVER_IP --ip $AGENT1_IP --ssh-key ~/.ssh/ec2-training-keypair.pem --user ec2-user
 
-export KUBECONFIG=~/kubeconfig
+export KUBECONFIG=$(PWD)/kubeconfig
 
 # Verification
 kubectl get nodes -o wide
@@ -117,17 +117,6 @@ fission package info --name java-src-pkg-zip-wcok
 kubectl -n fission-builder get pods
 ```
 
-**Create function:**
-```
-fission fn create --name hello --pkg java-src-pkg-zip-ludc --env quarkus-native
-
-fission fn test --name hello
-
-fission route add --function hello --url /hello --createingress
-
-curl http://localhost:8080/hello
-```
-
 **Rockstar**
 ```
 fission fn create --name rockstar --pkg java-src-pkg-zip-ludc --env quarkus-native
@@ -138,8 +127,22 @@ fission route add --function rockstar --url /rockstars --createingress --method 
 
 fission route add --function rockstar --url /rockstar --createingress --method POST
 
-curl -X GET "http://localhost:8080/rockstars"
+curl -X GET "http://$SERVER_IP/rockstars"
 
-curl -X POST -H "Content-Type: application/json;charset=UTF-8" "http://localhost:8080/rockstar" -d '{"name":"Led Zeppelin"}'
+curl -X POST -H "Content-Type: application/json;charset=UTF-8" "http://$SERVER_IP/rockstar" -d '{"name":"Jaco Pastorius"}'
 
+```
+
+
+**Create Vote function:**
+
+Example with k3d:
+```
+fission fn create --name hello --pkg java-src-pkg-zip-ludc --env quarkus-native
+
+fission fn test --name hello
+
+fission route add --function hello --url /hello --createingress
+
+curl http://localhost:8080/hello
 ```

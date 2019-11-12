@@ -18,9 +18,9 @@ public class RockStarsEndpointTest {
               .then()
               .statusCode(200)
               .body(
-                    containsString("Prince"),
-                    containsString("Magma"),
-                    containsString("Bruce Springsteen")
+                    containsString("Mick Jagger"),
+                    containsString("John Lennon"),
+                    containsString("Jimmy Page")
                     );
     }
 
