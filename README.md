@@ -29,11 +29,34 @@ curl -w "\n" http://localhost:8080/hello
 
 # K3S
 
+## Deploy Remote K3S cluster
+
+```
+export SERVER_IP=34.254.174.221
+export AGENT1_IP=18.202.20.167
+export AGENT2_IP=18.203.220.107
+
+k3sup install --ip $SERVER_IP --ssh-key ~/.ssh/ec2-training-keypair.pem --user ec2-user
+
+k3sup join --server-ip $SERVER_IP --ip $AGENT1_IP --ssh-key ~/.ssh/ec2-training-keypair.pem --user ec2-user
+k3sup join --server-ip $SERVER_IP --ip $AGENT2_IP --ssh-key ~/.ssh/ec2-training-keypair.pem --user ec2-user
+
+export KUBECONFIG=~/kubeconfig
+
+# Verification
+kubectl get nodes -o wide
+
+```
+
+## Deploy a local K3D cluster
+
 **Deploy a local K3S on Docker:**
 ```
 k3d create --publish 8081:30001@k3d-k3s-default-worker-0 --publish 8080:80@k3d-k3s-default-worker-0  --workers 2
 export KUBECONFIG="$(k3d get-kubeconfig --name='k3s-default')"
 ```
+
+## Post-installation of cluster
 
 **Initialize Helm:**
 ```
