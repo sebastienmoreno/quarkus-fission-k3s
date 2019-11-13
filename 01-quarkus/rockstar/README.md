@@ -1,9 +1,30 @@
+ROCKSTAR QUARKUS DEMO
+=====================
+
+# How to use it
+
+## Build the demo
+JVM:
+```
+./mvnw package
+```
+
+Native:
+```
+./mvnw package -Pnative
+```
+
+## Tests
+
+```
+java -jar target/rockstar-1.0-SNAPSHOT-runner.jar
+
 curl -X GET "http://localhost:8080/"
+curl -X POST -H "Content-Type: application/json;charset=UTF-8" "http://localhost:8080/" -d '{"name":"Stanley Clark"}'
+```
 
-curl -X POST -H "Content-Type: application/json;charset=UTF-8" "http://localhost:8080/" -d '{"name":"toto2"}'
 
-
-# Quarkus demo: Hibernate ORM with Panache and RESTEasy
+# Hibernate ORM with Panache and RESTEasy
 
 This is a minimal CRUD service exposing a couple of endpoints over REST,
 with a front-end based on Angular so you can play with it from your browser.
